@@ -1,9 +1,10 @@
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from all_kb import start_kb
+from all_kb import start_kb, master_kb
+from db import DataBase
 
-
+db = DataBase()
 router = Router()
 
 @router.message(Command("start"))
