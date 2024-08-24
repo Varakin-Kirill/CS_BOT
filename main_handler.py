@@ -6,8 +6,6 @@ from state_list import reserve_form
 from all_kb import confirm_kb
 from db import DataBase
 
-
-
 router = Router()
 
 db = DataBase()
