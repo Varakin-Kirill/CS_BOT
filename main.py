@@ -17,7 +17,7 @@ async def main():
     dp.include_router(start.router)
     dp.include_router(main_handler.router)
     dp.include_router(master_handler.router)
-    await dp.start_polling(bot, skip_updates=True)
+    await dp.start_polling(bot, skip_updates=False)
 
 if __name__ == "__main__":
     asyncio.run(main())
