@@ -1,0 +1,35 @@
+version : "3.11"
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: cs_hookah
+      POSTGRES_USER: postgres
+      POSTGRES_DB: cs
+    ports:
+      - "5432:5432" 
+    expose:
+      - "5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - postgres
+  bot:
+    image: googrand/cs_bot
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    command: python -m main
+    networks:
+      - postgres
+
+    
+volumes:
+  postgres-data:
+
+networks:
+  postgres:
+    driver: bridge

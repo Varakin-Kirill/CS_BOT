@@ -9,3 +9,8 @@ class reserve_form(StatesGroup):
     date = State()
     time = State()
     confirm = State()
+
+
+class comment(StatesGroup):
+    payment = State()
+    comment = State()

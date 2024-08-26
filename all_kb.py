@@ -25,9 +25,15 @@ start_kb = ReplyKeyboardMarkup(
 
 SELL = "Замутить продажу"
 SEE_BOOKS = "Посмотреть брони"
+SEE_SALARY = "Скока за месяц"
+SEE_INCOME = "Скока седня"
+OPEN = "Начать смену"
+CLOSE = "Закрыть смену"
 
 master_buttons = [
-    [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)]
+    [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
+    [KeyboardButton(text=SEE_SALARY), KeyboardButton(text=SEE_INCOME)],
+    [KeyboardButton(text=OPEN), KeyboardButton(text=CLOSE)],
 ]
 
 master_kb = ReplyKeyboardMarkup(
@@ -47,4 +53,17 @@ def select_item_markup(items):
     return InlineKeyboardMarkup(
     inline_keyboard=items,
     resize_keyboard=True,
+)
+
+class PaymentCallback(CallbackData, prefix="payment"):
+    payment_type: str
+
+payment_buttons = [
+    [InlineKeyboardButton(text="Кеш", callback_data=PaymentCallback(payment_type="cash").pack()),
+     InlineKeyboardButton(text="Перевод", callback_data=PaymentCallback(payment_type="transfer").pack())]
+]
+
+payment_kb = InlineKeyboardMarkup(
+    inline_keyboard=payment_buttons,
+    resize_keyboard=True
 )
