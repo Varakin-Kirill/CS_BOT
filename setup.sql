@@ -71,15 +71,7 @@ create table
         comment text not null
     );
 
-"""SELECT COUNT(*) as res FROM items_purchased 
-    WHERE item_id < 5
-    AND created_at >= date_trunc('month', now())
-    AND created_at < date_trunc('month', now()) + interval '1 month',
-    GROUP BY master;
-
-
-
-    """ CREATE TYPE expense_type AS ENUM (
+ CREATE TYPE expense_type AS ENUM (
     'tobacco',
     'coal',
     'drinks',
@@ -101,8 +93,30 @@ create table
         id serial primary key,
         master uuid not null references masters (user_id),
         opened_at timestamp not null default now (),
-        closed_at timestamp null
+        closed_at timestamp null,
+        salary int
     );
+
+
+
+CREATE OR REPLACE FUNCTION count_salary() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.salary is NUll then RETURN NULL;
+    with ts as(SELECT count(*) as hookahs from items_purchased  
+    where item_id <5  
+    and created_at >= NEW.opened_at 
+    and created_at < NEW.closed_at
+    and master = NEW.master)
+    UPDATE "duties"
+    SET salary = select max(1250, hookahs * 100 + 250) as salary from ts;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER salary_count
+After update ON duties
+FOR EACH ROW
+EXECUTE FUNCTION count_salary();
 
 insert into
     items (name, price)
@@ -138,3 +152,9 @@ insert into
     items (name, price)
 values
     ('Чай', 200);
+
+
+    SELECT SUM(salary) FROM duties
+    WHERE opened_at >= DATE_TRUNC('month', CURRENT_DATE)
+    AND closed_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+    GROUP BY master

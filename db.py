@@ -7,7 +7,6 @@ load_dotenv()
 
 class DataBase:
     def __init__(self):
-        print(os.getenv("PASSWORD"))
         self.connection = psycopg2.connect(
             dbname=os.getenv("DB_NAME"),
             user=os.getenv("USER"),
@@ -41,6 +40,11 @@ class DataBase:
                     ),
                 )
                 return cursor.fetchone()
+
+    # """SELECT SUM(salary) FROM duties
+    # WHERE opened_at >= DATE_TRUNC('month', CURRENT_DATE)
+    # AND closed_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+    # """
 
     def insert_buy(self, item_id, master_id, payment, comment):
         with self.connection as conn:
@@ -78,7 +82,9 @@ class DataBase:
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """select id, master from duties where closed_at is null"""
+                    """select id, master, tg_id from duties where closed_at is null
+                        left JOIN masters ON duties.master=masters.user_id
+                        """
                 )
                 return cursor.fetchone()
 
@@ -111,7 +117,10 @@ class DataBase:
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO reserve (user_tg_id, name, surname, phone, amount, date, time)
-                               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (),
+                    """SELECT  name, SUM(salary) FROM duties
+                    LEFT JOIN masters On duties.master = masters.user_id
+                    WHERE opened_at >= DATE_TRUNC('month', CURRENT_DATE)
+                    AND closed_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+                    GROUP BY name""",
                 )
+                return cursor.fetchall()

@@ -11,6 +11,7 @@ class reserve_form(StatesGroup):
     confirm = State()
 
 
-class comment(StatesGroup):
+class item(StatesGroup):
+    apply = State()
     payment = State()
     comment = State()

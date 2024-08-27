@@ -31,13 +31,14 @@ SEE_BOOKS = "Посмотреть брони"
 SEE_SALARY = "Скока за месяц"
 SEE_INCOME = "Скока седня"
 OPEN = "Начать смену"
+GET_MONTH_SALARY = "получить зп"
 # CLOSE = "Закрыть смену"
 
 master_buttons = [
     [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
     [KeyboardButton(text=SEE_SALARY), KeyboardButton(text=SEE_INCOME)],
+    [KeyboardButton(text=OPEN), KeyboardButton(text=GET_MONTH_SALARY)],
 ]
-# [KeyboardButton(text=OPEN), KeyboardButton(text=CLOSE)],
 
 master_kb = ReplyKeyboardMarkup(keyboard=master_buttons, resize_keyboard=True)
 
