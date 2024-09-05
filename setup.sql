@@ -1,7 +1,6 @@
 -- psql postgres://postgres:cs_hookah@localhost:5432/cs
 create table
     if not exists users (
-        user_id uuid not null primary key,
         tg_id int not null,
         name text not null,
         surname text not null,
@@ -45,10 +44,12 @@ values
 create table
     if not exists reservations (
         id serial primary key,
-        user_id uuid not null references users (user_id),
+        tg_id int not null,
+        full_name text not null,
+        phone text,
         amount int not null,
         datetime timestamp not null,
-        ps boolean not null,
+        comment text,
         success boolean not null default false
     );
 
@@ -85,7 +86,8 @@ create table
         id serial primary key,
         expense expense_type not null,
         amount int not null, -- final price
-        comment text null
+        comment text not null, 
+        datetime timestamp not null
     );
 
 create table
@@ -158,3 +160,32 @@ values
     WHERE opened_at >= DATE_TRUNC('month', CURRENT_DATE)
     AND closed_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
     GROUP BY master
+
+
+
+
+
+-- скрипт для подсчета прибыли
+SELECT 
+    income_subquery.total_income,
+    expenses_subquery.expenses,
+    (income_subquery.total_income - expenses_subquery.expenses) AS clear_income
+FROM 
+    (SELECT 
+         SUM(items.price) AS total_income
+     FROM 
+         items_purchased
+     LEFT JOIN 
+         items ON items.item_id = items_purchased.item_id
+     WHERE 
+         items_purchased.created_at < NOW()
+         AND items_purchased.created_at >= DATE_TRUNC('month', NOW()) - INTERVAL '1 month'
+    ) AS income_subquery,
+    (SELECT 
+         SUM(amount) AS expenses
+     FROM 
+         expenses
+     WHERE 
+         datetime < NOW()
+         AND datetime >= DATE_TRUNC('month', NOW()) - INTERVAL '1 month'
+    ) AS expenses_subquery;

@@ -20,7 +20,9 @@ start_buttons = [
     [
         KeyboardButton(text="Забронировать столик"),
         KeyboardButton(text="Мои бронирования"),
+        # KeyboardButton(text="Написать кальянному мастеру"),
         KeyboardButton(text="Написать кальянному мастеру"),
+        # KeyboardButton(text="отправить контакт", request_contact=True),
     ]
 ]
 
@@ -32,12 +34,15 @@ SEE_SALARY = "Скока за месяц"
 SEE_INCOME = "Скока седня"
 OPEN = "Начать смену"
 GET_MONTH_SALARY = "получить зп"
+EXPENSES = "записать траты"
+
 # CLOSE = "Закрыть смену"
 
 master_buttons = [
     [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
     [KeyboardButton(text=SEE_SALARY), KeyboardButton(text=SEE_INCOME)],
     [KeyboardButton(text=OPEN), KeyboardButton(text=GET_MONTH_SALARY)],
+    [KeyboardButton(text=EXPENSES)],
 ]
 
 master_kb = ReplyKeyboardMarkup(keyboard=master_buttons, resize_keyboard=True)
@@ -83,4 +88,57 @@ payment_buttons = [
     ]
 ]
 
+
 payment_kb = InlineKeyboardMarkup(inline_keyboard=payment_buttons, resize_keyboard=True)
+
+
+class ExpensesCallback(CallbackData, prefix="expense"):
+    expense_type: str
+
+
+expense_buttons = [
+    [
+        InlineKeyboardButton(
+            text="Табак", callback_data=ExpensesCallback(expense_type="tobacco").pack()
+        ),
+        InlineKeyboardButton(
+            text="Уголь",
+            callback_data=ExpensesCallback(expense_type="coal").pack(),
+        ),
+    ],
+    [
+        InlineKeyboardButton(
+            text="напитки",
+            callback_data=ExpensesCallback(expense_type="drinks").pack(),
+        ),
+        InlineKeyboardButton(
+            text="Аренда",
+            callback_data=ExpensesCallback(expense_type="rent").pack(),
+        ),
+    ],
+    [
+        InlineKeyboardButton(
+            text="Зарплата",
+            callback_data=ExpensesCallback(expense_type="salary").pack(),
+        ),
+        InlineKeyboardButton(
+            text="Другое",
+            callback_data=ExpensesCallback(expense_type="other").pack(),
+        ),
+    ],
+]
+
+
+expense_kb = InlineKeyboardMarkup(inline_keyboard=expense_buttons, resize_keyboard=True)
+
+
+get_phone_button = [
+    [
+        KeyboardButton(text="Отправить номер телефона", request_contact=True),
+    ]
+]
+
+
+get_phone_kb = ReplyKeyboardMarkup(
+    keyboard=get_phone_button, resize_keyboard=True, one_time_keyboard=True
+)

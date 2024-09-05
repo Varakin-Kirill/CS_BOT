@@ -59,6 +59,18 @@ class DataBase:
                     ),
                 )
 
+    def insert_expense(self, expense, amount, comment):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """insert into expenses (expense, amount, comment, datetime) values(%s, %s, %s, now())""",
+                    (
+                        expense,
+                        amount,
+                        comment,
+                    ),
+                )
+
     def get_hookah_master(self, tg_id):
         with self.connection as conn:
             with conn.cursor() as cursor:
@@ -104,13 +116,13 @@ class DataBase:
                     (tg_id, name, surname, phone, amount, date, time),
                 )
 
-    def insert_reserve(self, tg_id, name, surname, phone, amount, date, time):
+    def insert_reserve(self, tg_id, full_name, phone, amount, datetime, comment):
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO reserve (user_tg_id, name, surname, phone, amount, date, time)
+                    """INSERT INTO reservations (tg_id, full_name, phone, amount, datetime, comment)
                                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (tg_id, name, surname, phone, amount, date, time),
+                    (tg_id, full_name, phone, amount, datetime, comment),
                 )
 
     def get_month_salary(self):
