@@ -30,22 +30,30 @@ start_kb = ReplyKeyboardMarkup(keyboard=start_buttons, resize_keyboard=True)
 
 SELL = "Замутить продажу"
 SEE_BOOKS = "Посмотреть брони"
-SEE_SALARY = "Скока за месяц"
-SEE_INCOME = "Скока седня"
+STATS = "Статистика"
 OPEN = "Начать смену"
-GET_MONTH_SALARY = "получить зп"
+
 EXPENSES = "записать траты"
 
+GET_MONTH_SALARY = "Подглядеть зп"
+ITEMS_TODAY = "Продажи сегодня"
+SEE_INCOME = "Скока седня"
+BACK = "Назад"
 # CLOSE = "Закрыть смену"
 
 master_buttons = [
     [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
-    [KeyboardButton(text=SEE_SALARY), KeyboardButton(text=SEE_INCOME)],
-    [KeyboardButton(text=OPEN), KeyboardButton(text=GET_MONTH_SALARY)],
-    [KeyboardButton(text=EXPENSES)],
+    [KeyboardButton(text=STATS), KeyboardButton(text=OPEN), KeyboardButton(text=EXPENSES),],
 ]
 
 master_kb = ReplyKeyboardMarkup(keyboard=master_buttons, resize_keyboard=True)
+
+stats_buttons = [
+    [KeyboardButton(text=GET_MONTH_SALARY), KeyboardButton(text=ITEMS_TODAY),],
+    [KeyboardButton(text=BACK), KeyboardButton(text=SEE_INCOME)],
+]
+
+stats_kb = ReplyKeyboardMarkup(keyboard=stats_buttons, resize_keyboard=True)
 
 
 class ItemCallback(CallbackData, prefix="item"):

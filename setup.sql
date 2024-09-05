@@ -1,7 +1,7 @@
 -- psql postgres://postgres:cs_hookah@localhost:5432/cs
 create table
     if not exists users (
-        tg_id int not null,
+        tg_id int not null unique,
         name text not null,
         surname text not null,
         phone text not null
@@ -44,9 +44,7 @@ values
 create table
     if not exists reservations (
         id serial primary key,
-        tg_id int not null,
-        full_name text not null,
-        phone text,
+        user_tg_id int not null references users (tg_id),
         amount int not null,
         datetime timestamp not null,
         comment text,
@@ -99,18 +97,23 @@ create table
         salary int
     );
 
-
+with duty as (select * from duties where id = 6)
+SELECT count(*) as hookahs from items_purchased  
+    where item_id <5  
+    and created_at >= (select opened_at from duty) 
+    and created_at < (select closed_at from duty)
+    and master = (select master from duty)
 
 CREATE OR REPLACE FUNCTION count_salary() RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.salary is NUll then RETURN NULL;
+    IF NEW.salary is not NUll then RETURN NULL; end if;
     with ts as(SELECT count(*) as hookahs from items_purchased  
     where item_id <5  
     and created_at >= NEW.opened_at 
     and created_at < NEW.closed_at
     and master = NEW.master)
     UPDATE "duties"
-    SET salary = select max(1250, hookahs * 100 + 250) as salary from ts;
+    SET salary = (select greatest(1250, hookahs * 100 + 250) as salary from ts) where id = NEW.id;
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
@@ -120,25 +123,33 @@ After update ON duties
 FOR EACH ROW
 EXECUTE FUNCTION count_salary();
 
-insert into
-    items (name, price)
-values
-    ('Вечерний', 700);
+create table
+    if not exists presets (
+        id      serial  primary key,
+        user_id UUID    not null,
+        item_id int     not null,
+        comment text    not null
+    );
 
 insert into
     items (name, price)
 values
-    ('Дневной', 550);
+    ('Вечерний', 800);
 
 insert into
     items (name, price)
 values
-    ('Постоялец', 550);
+    ('Дневной', 600);
 
 insert into
     items (name, price)
 values
-    ('Постоялец Супер', 500);
+    ('Постоялец', 600);
+
+insert into
+    items (name, price)
+values
+    ('Постоялец Супер', 550);
 
 insert into
     items (name, price)

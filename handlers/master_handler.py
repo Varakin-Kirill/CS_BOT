@@ -5,7 +5,9 @@ from state_list import item, expenses
 from db import DataBase
 from all_kb import (
     SELL,
-    SEE_SALARY,
+    STATS,
+    ITEMS_TODAY,
+    BACK,
     SEE_INCOME,
     OPEN,
     GET_MONTH_SALARY,
@@ -18,6 +20,7 @@ from all_kb import (
     master_kb,
     payment_kb,
     expense_kb,
+    stats_kb,
 )
 from aiogram.filters import Command
 
@@ -29,6 +32,7 @@ db = DataBase()
 @router.message(F.text == SELL)
 async def select_item(message: Message, state: FSMContext):
     duty = db.get_active_duty()
+    await state.update_data(duty_id=duty[2])
     if duty[2] == message.from_user.id:
         buttons = select_item_buttons()
         markup = select_item_markup(buttons)
@@ -37,6 +41,13 @@ async def select_item(message: Message, state: FSMContext):
     else:
         await message.answer("Не твоя смена")
 
+@router.message(F.text == STATS)
+async def stats(message: Message, state: FSMContext):
+    await message.answer("Ага", reply_markup=stats_kb)
+
+@router.message(F.text == BACK)
+async def stats(message: Message, state: FSMContext):
+    await message.answer("Ага", reply_markup=master_kb)
 
 @router.callback_query(ItemCallback.filter(), item.apply)
 async def apply_item(
@@ -79,6 +90,16 @@ async def see_day_income(message: Message, state: FSMContext):
     else:
         await message.answer("Смена не твоя вроде")
 
+@router.message(F.text == ITEMS_TODAY)
+async def items_today(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if "duty_id" in data:
+        items = db.get_items_today(data["duty_id"])
+        res = [f"{name} -- {price} -- {comment}" for name, price, comment in items]
+        await message.answer(f"Продажи: \n {"\n".join(res)}")
+    else:
+        await message.answer("Смена не твоя вроде")
+
 
 @router.message(F.text == OPEN)
 async def open_duty(message: Message, state: FSMContext):
@@ -86,6 +107,7 @@ async def open_duty(message: Message, state: FSMContext):
     master_id = db.get_hookah_master(message.from_user.id)
 
     if duty is not None and duty[1] == master_id:
+        await state.update_data(master_id=master_id, duty_id=duty[0])
         await message.answer("Ты нахуя дважды смену открываешь додик")
     # elif duty is not None and duty[1] != data["master_id"]:
     #     await message.answer("Додик не закрыл предыдущую смену, так что иди нахуй")
@@ -104,9 +126,15 @@ async def open_duty(message: Message, state: FSMContext):
 async def get_month_salary(message: Message):
     data = db.get_month_salary()
     print(data)
-    await message.answer(
-        f"""Зарплата за месяц:\n{data[0][0]}:{data[0][1]}\n{data[1][0]}:{data[1][1]}"""
-    )
+    if len(data) > 0:
+        res = [f"{name}: {salary}" for name, salary in data]
+        await message.answer(
+            f"""Зарплата за месяц:\n{"\n".join(res)}"""
+        )
+    else:
+        await message.answer(
+            """Пока нечего считать"""
+        )
 
 
 @router.message(F.text == EXPENSES)

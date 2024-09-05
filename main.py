@@ -3,9 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 import logging
 import os
-
-# import CS_BOT.handlers.reserve_handler as reserve_handler, CS_BOT.handlers.start_handler as start_handler, CS_BOT.handlers.master_handler as master_handler
-from handlers import reserve_handler, start_handler, master_handler
+import handlers.reserve_handler as reserve_handler, handlers.start_handler as start_handler, handlers.master_handler as master_handler
 from dotenv import load_dotenv
 import threading
 from close_duties import close_duties
