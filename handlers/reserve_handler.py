@@ -3,8 +3,11 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram import types
 from state_list import reserve_form
-from all_kb import confirm_kb, get_phone_kb
+from all_kb import confirm_kb, start_kb,  get_phone_kb
 from db import DataBase
+
+# from aiogram_datepicker import Datepicker, DatepickerSettings
+# from handlers.calendar.common import _get_datepicker_settings
 
 router = Router()
 
@@ -13,8 +16,14 @@ db = DataBase()
 
 @router.message(F.text == "Забронировать столик")
 async def form(message: Message, state: FSMContext):
-    await message.answer("Введите имя:")
-    await state.set_state(reserve_form.name)
+    data = db.get_user_id(message.from_user.id)
+    if data is not None:
+        await state.update_data(data=data)
+        await message.answer("Введите кол-во человек:")
+        await state.set_state(reserve_form.amount)
+    else:
+        await message.answer("Введите имя:")
+        await state.set_state(reserve_form.name)
 
 
 @router.message(reserve_form.name)
@@ -48,8 +57,22 @@ async def phone(message: Message, state: FSMContext):
 @router.message(reserve_form.amount)
 async def amount(message: Message, state: FSMContext):
     await state.update_data(amount=message.text)
+    # datepicker = Datepicker(_get_datepicker_settings())
+
+    # markup = datepicker.start_calendar()
+    # await message.answer('Select a date: ', reply_markup=markup)
     await message.answer("Введите дату брони:")
     await state.set_state(reserve_form.date)
+
+# @router.callback_query(Datepicker.datepicker_callback.filter())
+# async def _process_datepicker(callback_query: CallbackQuery, callback_data: dict):
+#     datepicker = Datepicker(_get_datepicker_settings())
+
+#     date = await datepicker.process(callback_query, callback_data)
+#     if date:
+#         await callback_query.message.answer(date.strftime('%d/%m/%Y'))
+
+#     await callback_query.answer()
 
 
 @router.message(reserve_form.date)
@@ -77,10 +100,10 @@ async def confirm_message(message: Message, state: FSMContext):
     data = await state.get_data()
     await message.answer(
         (
-            f"Ваш данные указанные выше:\n"
+            f"Данные по бронированию:\n"
             f"<b>Имя</b>: {data['name']}\n"
             f"<b>Фамилия</b>: {data['surname']}\n"
-            f"<b>Номер телефона</b>: {data['phone']}\n"
+            f"<b>Телефон для связи</b>: {data['phone']}\n"
             f"<b>кол-во человек</b>: {data['amount']}\n"
             f"<b>Дата брони</b>: {data['date']}\n"
             f"<b>Время брони</b>: {data['time']}\n"

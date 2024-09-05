@@ -25,7 +25,7 @@ class DataBase:
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """with ts as (select opened_at, coalesce(closed_at, now()) as closed_at from duties where id = %s) 
+                    """with ts as (select opened_at, coalesce(closed_at, timezone('utc', now())) as closed_at from duties where id = %s) 
             select sum(100), count(*) 
                     from items_purchased T 
                         left join items 
@@ -94,8 +94,9 @@ class DataBase:
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """select id, master, tg_id from duties where closed_at is null
+                    """select id, master, tg_id from duties
                         left JOIN masters ON duties.master=masters.user_id
+                         where closed_at is null
                         """
                 )
                 return cursor.fetchone()
@@ -136,3 +137,22 @@ class DataBase:
                     GROUP BY name""",
                 )
                 return cursor.fetchall()
+            
+    def get_items_today(self, duty_id):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """ with ts as (select opened_at, coalesce(closed_at, timezone('utc', now())) as closed_at from duties where id = %s)
+                    SELECT name, price, comment FROM items_purchased
+                    LEFT JOIN items on items_purchased.item_id = items.item_id
+                    WHERE created_at >= (select opened_at from ts)
+                    AND created_at < (select closed_at from ts)""",
+                    (duty_id,)
+                )
+                return cursor.fetchall()
+
+
+# SELECT  name, salary, duties.id, opened_at, closed_at FROM duties
+#                     LEFT JOIN masters On duties.master = masters.user_id
+#                     WHERE opened_at >= DATE_TRUNC('month', CURRENT_DATE - interval '1 month')
+#                     AND closed_at < DATE_TRUNC('month', CURRENT_DATE)
