@@ -5,6 +5,8 @@ from aiogram import types
 from state_list import reserve_form
 from all_kb import confirm_kb, start_kb,  get_phone_kb
 from db import DataBase
+from aiogram.filters import Command
+from handlers.calendar.dialog import DialogCalendar, DialogCalendarCallback
 
 # from aiogram_datepicker import Datepicker, DatepickerSettings
 # from handlers.calendar.common import _get_datepicker_settings
@@ -12,6 +14,16 @@ from db import DataBase
 router = Router()
 
 db = DataBase()
+
+@router.message(Command("calendar"))
+async def amount(message: Message, state: FSMContext):
+    # await state.update_data(amount=message.text)
+    # datepicker = Datepicker(_get_datepicker_settings())
+
+    markup = await DialogCalendar.start_calendar(None, 12)
+    await message.answer('Select a date: ', reply_markup=markup)
+    # await message.answer("Введите дату брони:")
+    # await state.set_state(reserve_form.date)
 
 
 @router.message(F.text == "Забронировать столик")
@@ -52,7 +64,6 @@ async def phone(message: Message, state: FSMContext):
     await state.update_data(phone=message.contact.phone_number)
     await message.answer("Введите кол-во человек:")
     await state.set_state(reserve_form.amount)
-
 
 @router.message(reserve_form.amount)
 async def amount(message: Message, state: FSMContext):
