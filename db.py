@@ -117,13 +117,13 @@ class DataBase:
                     (tg_id, name, surname, phone, amount, date, time),
                 )
 
-    def insert_reserve(self, tg_id, full_name, phone, amount, datetime, comment):
+    def insert_reserve(self, tg_id, name, phone, amount, date, time, comment):
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO reservations (tg_id, full_name, phone, amount, datetime, comment)
+                    """INSERT INTO reservations (tg_id, name, phone, amount, date, time, comment)
                                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (tg_id, full_name, phone, amount, datetime, comment),
+                    (tg_id, name, phone, amount, date, time, comment),
                 )
 
     def get_month_salary(self):
@@ -137,7 +137,7 @@ class DataBase:
                     GROUP BY name""",
                 )
                 return cursor.fetchall()
-            
+
     def get_items_today(self, duty_id):
         with self.connection as conn:
             with conn.cursor() as cursor:
@@ -147,9 +147,27 @@ class DataBase:
                     LEFT JOIN items on items_purchased.item_id = items.item_id
                     WHERE created_at >= (select opened_at from ts)
                     AND created_at < (select closed_at from ts)""",
-                    (duty_id,)
+                    (duty_id,),
                 )
                 return cursor.fetchall()
+
+    def insert_user(self, user_tg_id, name, phone):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO "user" (tg_id, name, phone) VALUES (%s, %s, %s)""",
+                    (user_tg_id, name, phone),
+                )
+
+    def get_user_tg_id(self, user_tg_id):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""SELECT * from "user" where tg_id=%s""", (user_tg_id,))
+                rows = cursor.fetchone()
+                if rows is not None:
+                    return rows[0]
+                else:
+                    return None
 
 
 # SELECT  name, salary, duties.id, opened_at, closed_at FROM duties
