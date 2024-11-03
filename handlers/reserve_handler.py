@@ -3,18 +3,12 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram import types
 from state_list import reserve_form
-from all_kb import confirm_kb, start_kb, get_phone_kb
+from all_kb import confirm_kb, start_kb, get_phone_kb, get_date_kb
 from db import DataBase
 from aiogram.filters.callback_data import CallbackData
 from aiogram.filters import Command
 from main import bot
-from aiogram_calendar import (
-    SimpleCalendar,
-    SimpleCalendarCallback,
-    DialogCalendar,
-    DialogCalendarCallback,
-    get_user_locale,
-)
+
 from datetime import datetime
 
 
@@ -75,7 +69,10 @@ async def phone(message: Message, state: FSMContext):
 @router.message(reserve_form.amount)
 async def amount(message: Message, state: FSMContext):
     await state.update_data(amount=message.text)
-    await message.answer("Введите дату брони в формате дд.мм.гггг:")
+    await message.answer(
+        "Введите дату брони (не более недели вперед) в формате дд.мм.гггг:",
+        reply_markup=get_date_kb(),
+    )
     await state.set_state(reserve_form.date)
 
 
@@ -130,6 +127,20 @@ async def confirm_message(message: Message, state: FSMContext):
             parse_mode="HTML",
             reply_markup=confirm_kb,
         )
+
+
+@router.message(F.text == "начать сначала", reserve_form.confirm)
+async def start_over_handler(message: Message, state: FSMContext):
+    await state.clear()
+    user_info = db.get_user_tg_id(message.from_user.id)
+    if user_info is not None:
+        await state.update_data(user_info=user_info)
+        await message.answer("Введите кол-во человек:")
+        await state.set_state(reserve_form.amount)
+    else:
+        await message.answer("Введите имя:")
+        await state.set_state(reserve_form.name)
+    await state.set_state(reserve_form.name)
 
 
 @router.message(F.text == "Подтвердить", reserve_form.confirm)

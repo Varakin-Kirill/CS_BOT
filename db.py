@@ -162,10 +162,12 @@ class DataBase:
     def get_user_tg_id(self, user_tg_id):
         with self.connection as conn:
             with conn.cursor() as cursor:
-                cursor.execute("""SELECT * from "user" where tg_id=%s""", (user_tg_id,))
+                cursor.execute(
+                    """SELECT name, phone from "user" where tg_id=%s""", (user_tg_id,)
+                )
                 rows = cursor.fetchone()
                 if rows is not None:
-                    return rows[0]
+                    return rows
                 else:
                     return None
 

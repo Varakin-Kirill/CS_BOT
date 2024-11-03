@@ -7,6 +7,7 @@ from aiogram.types import (
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.filters.callback_data import CallbackData
 from db import DataBase
+from datetime import datetime, timedelta
 
 db = DataBase()
 
@@ -43,13 +44,20 @@ BACK = "Назад"
 
 master_buttons = [
     [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
-    [KeyboardButton(text=STATS), KeyboardButton(text=OPEN), KeyboardButton(text=EXPENSES),],
+    [
+        KeyboardButton(text=STATS),
+        KeyboardButton(text=OPEN),
+        KeyboardButton(text=EXPENSES),
+    ],
 ]
 
 master_kb = ReplyKeyboardMarkup(keyboard=master_buttons, resize_keyboard=True)
 
 stats_buttons = [
-    [KeyboardButton(text=GET_MONTH_SALARY), KeyboardButton(text=ITEMS_TODAY),],
+    [
+        KeyboardButton(text=GET_MONTH_SALARY),
+        KeyboardButton(text=ITEMS_TODAY),
+    ],
     [KeyboardButton(text=BACK), KeyboardButton(text=SEE_INCOME)],
 ]
 
@@ -150,3 +158,64 @@ get_phone_button = [
 get_phone_kb = ReplyKeyboardMarkup(
     keyboard=get_phone_button, resize_keyboard=True, one_time_keyboard=True
 )
+
+date_buttons = [
+    [
+        InlineKeyboardButton(text="Понедельник", callback_data="date"),
+        InlineKeyboardButton(text="Вторник", callback_data="date"),
+        InlineKeyboardButton(text="Среда", callback_data="date"),
+        InlineKeyboardButton(text="Четверг", callback_data="date"),
+        InlineKeyboardButton(text="Пятница", callback_data="date"),
+        InlineKeyboardButton(text="Суббота", callback_data="date"),
+        InlineKeyboardButton(text="Воскресенье", callback_data="date"),
+    ],
+]
+date_kb = InlineKeyboardMarkup(inline_keyboard=date_buttons)
+
+days_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вск"]
+
+
+def get_date_kb():
+    today = datetime.now()
+    start_of_week = today
+    dates_this_week = []
+    for i in range(7):
+        date = start_of_week + timedelta(days=i)
+        dates_this_week.append(date)
+
+    date_buttons = [
+        [
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[0].weekday()]}({dates_this_week[0].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[1].weekday()]}({dates_this_week[1].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[2].weekday()]}({dates_this_week[2].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[3].weekday()]}({dates_this_week[3].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[4].weekday()]}({dates_this_week[4].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[5].weekday()]}({dates_this_week[5].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+            InlineKeyboardButton(
+                text=f"{days_of_week[dates_this_week[6].weekday()]}({dates_this_week[6].strftime('%m-%d')})",
+                callback_data="date",
+            ),
+        ],
+    ]
+    date_kb = InlineKeyboardMarkup(inline_keyboard=date_buttons)
+    return date_kb

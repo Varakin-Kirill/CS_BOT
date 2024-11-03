@@ -1,4 +1,9 @@
 -- psql postgres://postgres:cs_hookah@localhost:5432/cs
+truncate items_purchased
+
+
+
+
 create table
     if not exists users (
         tg_id int not null unique,
