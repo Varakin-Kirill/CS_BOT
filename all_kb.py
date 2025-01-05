@@ -31,6 +31,7 @@ start_kb = ReplyKeyboardMarkup(keyboard=start_buttons, resize_keyboard=True)
 
 SELL = "Замутить продажу"
 SEE_BOOKS = "Посмотреть брони"
+DISCOUNTERS = "Господа пидарасы"
 STATS = "Статистика"
 OPEN = "Начать смену"
 
@@ -43,12 +44,8 @@ BACK = "Назад"
 # CLOSE = "Закрыть смену"
 
 master_buttons = [
-    [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS)],
-    [
-        KeyboardButton(text=STATS),
-        KeyboardButton(text=OPEN),
-        KeyboardButton(text=EXPENSES),
-    ],
+    [KeyboardButton(text=SELL), KeyboardButton(text=SEE_BOOKS), KeyboardButton(text=DISCOUNTERS)],
+    [KeyboardButton(text=STATS), KeyboardButton(text=OPEN), KeyboardButton(text=EXPENSES),],
 ]
 
 master_kb = ReplyKeyboardMarkup(keyboard=master_buttons, resize_keyboard=True)

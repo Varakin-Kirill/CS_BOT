@@ -108,22 +108,13 @@ class DataBase:
                     """update duties set closed_at = now() where closed_at is null;""",
                 )
 
-    def validate_reserve(self, tg_id, name, surname, phone, amount, date, time):
+    def insert_reserve(self, tg_id, amount, date, comment):
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO reserve (user_tg_id, name, surname, phone, amount, date, time)
-                               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (tg_id, name, surname, phone, amount, date, time),
-                )
-
-    def insert_reserve(self, tg_id, name, phone, amount, date, time, comment):
-        with self.connection as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """INSERT INTO reservations (tg_id, name, phone, amount, date, time, comment)
-                               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (tg_id, name, phone, amount, date, time, comment),
+                    """INSERT INTO reservations (tg_id, amount, datetime, comment)
+                               VALUES (%s, %s, %s, %s)""",
+                    (tg_id, amount, date, comment),
                 )
 
     def get_month_salary(self):
@@ -155,16 +146,14 @@ class DataBase:
         with self.connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO "user" (tg_id, name, phone) VALUES (%s, %s, %s)""",
+                    """INSERT INTO users (tg_id, name, phone) VALUES (%s, %s, %s)""",
                     (user_tg_id, name, phone),
                 )
 
     def get_user_tg_id(self, user_tg_id):
         with self.connection as conn:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    """SELECT name, phone from "user" where tg_id=%s""", (user_tg_id,)
-                )
+                cursor.execute("""SELECT name, phone from users where tg_id=%s""", (user_tg_id,))
                 rows = cursor.fetchone()
                 if rows is not None:
                     return rows
