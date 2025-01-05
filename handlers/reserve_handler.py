@@ -8,7 +8,6 @@ from db import DataBase
 from aiogram.filters.callback_data import CallbackData
 from aiogram.filters import Command
 from main import bot
-
 from datetime import datetime
 
 
@@ -128,6 +127,19 @@ async def confirm_message(message: Message, state: FSMContext):
             reply_markup=confirm_kb,
         )
 
+@router.message(F.text == "начать сначала", reserve_form.confirm)
+async def start_over_handler(message: Message, state: FSMContext):
+    await state.clear()
+    user_info = db.get_user_tg_id(message.from_user.id)
+    if user_info is not None:
+        await state.update_data(user_info=user_info)
+        await message.answer("Введите кол-во человек:")
+        await state.set_state(reserve_form.amount)
+    else:
+        await message.answer("Введите имя:")
+        await state.set_state(reserve_form.name)
+    await state.set_state(reserve_form.name)
+
 
 @router.message(F.text == "начать сначала", reserve_form.confirm)
 async def start_over_handler(message: Message, state: FSMContext):
@@ -151,22 +163,16 @@ async def confirm_handler(message: types.Message, state: FSMContext):
         db.insert_user(message.from_user.id, data["name"], data["phone"])
         db.insert_reserve(
             message.from_user.id,
-            data["name"],
-            data["phone"],
             data["amount"],
-            data["date"],
-            data["time"],
+            date_to_type(data['date'], data['time']),
             data["comment"],
         )
         await state.clear()
     else:
         db.insert_reserve(
             message.from_user.id,
-            data["user_info"][0],
-            data["user_info"][1],
             data["amount"],
-            data["date"],
-            data["time"],
+            date_to_type(data['date'], data['time']),
             data["comment"],
         )
 

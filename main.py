@@ -3,10 +3,11 @@ import asyncio
 from aiogram import Bot, Dispatcher
 import logging
 import os
-import handlers.reserve_handler as reserve_handler, handlers.start_handler as start_handler, handlers.master_handler as master_handler
+from handlers import master 
+import handlers.reserve_handler as reserve_handler, handlers.start_handler as start_handler
 from dotenv import load_dotenv
 import threading
-from close_duties import close_duties
+from schedules import schedules
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,9 +19,9 @@ bot = Bot(token=os.environ.get("BOT_TOKEN"))
 
 async def main():
     dp.include_router(start_handler.router)
+    dp.include_router(master.router)
     dp.include_router(reserve_handler.router)
-    dp.include_router(master_handler.router)
-    scheduler_thread = threading.Thread(target=close_duties)
+    scheduler_thread = threading.Thread(target=schedules)
     scheduler_thread.start()
     await dp.start_polling(bot, skip_updates=False)
 
